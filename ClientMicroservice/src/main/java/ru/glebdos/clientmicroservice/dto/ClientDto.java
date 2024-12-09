@@ -35,6 +35,7 @@ public class ClientDto {
         this.phoneNumber = phoneNumber;
         this.address = address;
     }
+    public ClientDto(){}
 
     public @NotNull @Size(min = 2, max = 50) String getFirstName() {
         return firstName;
