@@ -1,5 +1,6 @@
 package ru.glebdos.clientmicroservice.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +38,16 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public ClientDto getClientByPhoneNumber(String phoneNumber) {
 
-        Client client = clientRepository.findByPhoneNumber(phoneNumber);
+        Client client = clientRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new EntityNotFoundException("Client not found " + phoneNumber));
 
         return convertClientToClientDto(client);
     }
 
     @Override
-    public void updateClient(ClientDto clientDto, String phoneNumber) {
-      Client client =  clientRepository.findByPhoneNumber(phoneNumber);
+    public ClientDto updateClient( ClientDto clientDto, String phoneNumber) {
+      Client client =  clientRepository.findByPhoneNumber(phoneNumber)
+              .orElseThrow(() -> new EntityNotFoundException("Client not found " + phoneNumber));
       LOGGER.info("founded client: {}", client);
         if (clientDto.getFirstName() != null) client.setFirstName(clientDto.getFirstName());
         if (clientDto.getSecondName() != null) client.setSecondName(clientDto.getSecondName());
@@ -55,12 +58,14 @@ public class ClientServiceImpl implements ClientService {
         LOGGER.info("updated client: {}", client);
       clientRepository.save(client);
 
+      return convertClientToClientDto(client);
+
     }
 
     @Override
     public void deleteClient(String phoneNumber) {
         LOGGER.info("deleting client: {}", phoneNumber);
-        clientRepository.deleteClientByPhoneNumber(phoneNumber);
+         clientRepository.deleteClientByPhoneNumber(phoneNumber);
     }
 
 

@@ -14,7 +14,7 @@ public interface ClientService {
      void createClient(ClientDto clientDto);
      ClientDto getClientByPhoneNumber(String phoneNumber);
 
-     void updateClient(ClientDto clientDto, String phoneNumber);
+     ClientDto updateClient(ClientDto clientDto, String phoneNumber);
 
      void deleteClient(String phoneNumber);
 }
