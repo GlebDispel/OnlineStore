@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.glebdos.clientmicroservice.dto.ClientDto;
+import ru.glebdos.clientmicroservice.dto.PartialUpdateClientDto;
 import ru.glebdos.clientmicroservice.service.ClientService;
 import ru.glebdos.clientmicroservice.util.ClientException;
 
@@ -48,21 +49,21 @@ public class ClientController {
     }
 
     @PostMapping("/update/{phoneNumber}")
-    public ResponseEntity<ClientDto> updateClient(@RequestBody @Valid ClientDto clientDto, @PathVariable @Valid String phoneNumber) {
+    public ResponseEntity<String> updateClient(@RequestBody @Valid PartialUpdateClientDto updateClientDto,
+                                                  @PathVariable @Valid String phoneNumber) {
         LOGGER.info("Number here : {}",phoneNumber);
-        LOGGER.info("Client here : {}",clientDto);
+        LOGGER.info("Client here : {}", updateClientDto);
+        clientService.updateClient(updateClientDto, phoneNumber);
 
+        return ResponseEntity.ok("Client updated");
 
-        return ResponseEntity.ok(clientService.updateClient(clientDto, phoneNumber));
-
-        // ОСТАНОВИЛСЯ ТУТ. НУЖНО РЕШИТЬ ТЕРКИ ВАЛИДАТОРОВ !!!
     }
 
     @Transactional
     @PostMapping("/delete")
-    public String deleteClient(@RequestBody @Valid String phoneNumber) {
+    public ResponseEntity<String> deleteClient(@RequestBody @Valid String phoneNumber) {
         clientService.deleteClient(phoneNumber);
-        return "ResponseEntity.ok()";
+        return ResponseEntity.ok("Client deleted");
     }
 
 
