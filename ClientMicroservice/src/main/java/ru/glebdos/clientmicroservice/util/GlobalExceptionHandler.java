@@ -21,22 +21,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-    public class GlobalExceptionHandler {
+public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-        @ExceptionHandler
-        private ResponseEntity<ClientErrorResponse> handleException(ClientException e) {
-            LOGGER.error("Client Exception: {}", e.getMessage());
-            ClientErrorResponse response = new ClientErrorResponse(
-                    e.getMessage(),
-                    System.currentTimeMillis()
-            );
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ClientErrorResponse> handleGenericException(Exception e) {
+        LOGGER.error("Unexpected error: {}", e.getMessage(), e);
+        ClientErrorResponse response = new ClientErrorResponse(
+                e.getMessage(),
+                System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        @ExceptionHandler(MethodArgumentNotValidException.class)
+    //ловит исключения, связанные с нарушением валидации полей
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     private ResponseEntity<ClientErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
         StringBuilder errorMessage = new StringBuilder();
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
@@ -46,32 +46,33 @@ import java.util.stream.Collectors;
                     .append(fieldError.getDefaultMessage())
                     .append(";");
         }
-         ClientErrorResponse response = new ClientErrorResponse(
-                 errorMessage.toString(),
-                 System.currentTimeMillis()
-         );
+        ClientErrorResponse response = new ClientErrorResponse(
+                errorMessage.toString(),
+                System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    //Ловит ошибки, возникающие при неверном формате тела запроса, например, синтаксические ошибки JSON.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    private ResponseEntity<ClientErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        ClientErrorResponse response = new ClientErrorResponse(
+                e.getLocalizedMessage(),
+                System.currentTimeMillis()
+        );
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    private ResponseEntity<ClientErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-            ClientErrorResponse response = new ClientErrorResponse(
-                    e.getLocalizedMessage(),
-                    System.currentTimeMillis()
-            );
-
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
+    // Ловит ошибки, связанные с отсутствием объекта в базе данных
     @ExceptionHandler(EntityNotFoundException.class)
     private ResponseEntity<ClientErrorResponse> handleEntityNotFoundException(EntityNotFoundException e) {
-            ClientErrorResponse response = new ClientErrorResponse(
-                    e.getLocalizedMessage(),
-                    System.currentTimeMillis()
-            );
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        ClientErrorResponse response = new ClientErrorResponse(
+                e.getLocalizedMessage(),
+                System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    }
+}
 
 

@@ -12,14 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.glebdos.clientmicroservice.dto.ClientDto;
 import ru.glebdos.clientmicroservice.dto.PartialUpdateClientDto;
 import ru.glebdos.clientmicroservice.service.ClientService;
-import ru.glebdos.clientmicroservice.util.ClientException;
 
-import java.util.Optional;
+
+
 
 
 @RestController
@@ -35,6 +34,7 @@ public class ClientController {
     }
 
 
+    @Transactional
     @PostMapping("/registration")
     public ResponseEntity<String> createClient(@RequestBody @Valid ClientDto clientDto) {
         clientService.createClient(clientDto);
@@ -48,9 +48,10 @@ public class ClientController {
 
     }
 
+    @Transactional
     @PostMapping("/update/{phoneNumber}")
     public ResponseEntity<String> updateClient(@RequestBody @Valid PartialUpdateClientDto updateClientDto,
-                                                  @PathVariable @Valid String phoneNumber) {
+                                                  @PathVariable String phoneNumber) {
         LOGGER.info("Number here : {}",phoneNumber);
         LOGGER.info("Client here : {}", updateClientDto);
         clientService.updateClient(updateClientDto, phoneNumber);
@@ -60,8 +61,8 @@ public class ClientController {
     }
 
     @Transactional
-    @PostMapping("/delete")
-    public ResponseEntity<String> deleteClient(@RequestBody @Valid String phoneNumber) {
+    @DeleteMapping("/delete{phoneNumber}")
+    public ResponseEntity<String> deleteClient(@PathVariable String phoneNumber) {
         clientService.deleteClient(phoneNumber);
         return ResponseEntity.ok("Client deleted");
     }

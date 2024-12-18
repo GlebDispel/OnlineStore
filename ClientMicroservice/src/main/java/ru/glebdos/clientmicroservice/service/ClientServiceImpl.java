@@ -47,6 +47,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void updateClient(PartialUpdateClientDto updateClientDto, String phoneNumber) {
+        if(phoneNumber == null)
+            throw new NullPointerException("phoneNumber is null");
       Client client =  clientRepository.findByPhoneNumber(phoneNumber)
               .orElseThrow(() -> new EntityNotFoundException("Client not found " + phoneNumber));
       LOGGER.info("founded client: {}", client);
@@ -55,7 +57,6 @@ public class ClientServiceImpl implements ClientService {
         if (updateClientDto.getEmail() != null) client.setEmail(updateClientDto.getEmail());
         if (updateClientDto.getAddress() != null) client.setAddress(updateClientDto.getAddress());
         if (updateClientDto.getPhoneNumber() != null) client.setPhoneNumber(updateClientDto.getPhoneNumber());
-        if (updateClientDto.getAddress() != null) client.setAddress(updateClientDto.getAddress());
         LOGGER.info("updated client: {}", client);
       clientRepository.save(client);
 
@@ -63,6 +64,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void deleteClient(String phoneNumber) {
+        if(phoneNumber == null)
+            throw new NullPointerException("phoneNumber is null");
         LOGGER.info("deleting client: {}", phoneNumber);
         clientRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found " + phoneNumber));
