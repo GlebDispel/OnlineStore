@@ -45,11 +45,13 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
     //Ловит ошибки, возникающие при неверном формате тела запроса, например, синтаксические ошибки JSON.
     @ExceptionHandler(HttpMessageNotReadableException.class)
     private ResponseEntity<ClientErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        LOGGER.info("HttpMessageNotReadableException: {}", e.getMessage());
         ClientErrorResponse response = new ClientErrorResponse(
-                e.getLocalizedMessage(),
+                "Ошибка в запросе",
                 System.currentTimeMillis()
         );
 
@@ -59,12 +61,17 @@ public class GlobalExceptionHandler {
     // Ловит ошибки, связанные с отсутствием объекта в базе данных
     @ExceptionHandler(EntityNotFoundException.class)
     private ResponseEntity<ClientErrorResponse> handleEntityNotFoundException(EntityNotFoundException e) {
-        ClientErrorResponse response = new ClientErrorResponse(
-                e.getLocalizedMessage(),
-                System.currentTimeMillis()
-        );
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        LOGGER.info("Entity number: {}", e.getMessage());
+
+         ClientErrorResponse patternResponse = new ClientErrorResponse(
+
+                    "Пользователь c номером " + e.getMessage() + " не найден",
+                    System.currentTimeMillis()
+            );
+            return new ResponseEntity<>(patternResponse, HttpStatus.NOT_FOUND);
+
     }
+
 
 }
 

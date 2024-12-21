@@ -9,10 +9,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PartialUpdateUserDto {
+public class DynamicDto {
 
     @Size(min = 2, max = 50)
     private String firstName;
@@ -32,7 +33,7 @@ public class PartialUpdateUserDto {
     @Size(max = 100)
     private String address;
 
-    @AssertTrue(message = "At least one field must be provided for update")
+    @AssertTrue(message = "Для обновления должно быть указано хотя бы одно поле")
     public boolean isValid() {
         return firstName != null || secondName != null || email != null ||
                 phoneNumber != null || address != null;

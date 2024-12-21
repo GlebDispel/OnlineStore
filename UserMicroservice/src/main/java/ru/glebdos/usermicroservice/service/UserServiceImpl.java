@@ -7,13 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.glebdos.usermicroservice.dto.PartialUpdateUserDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.glebdos.usermicroservice.dto.DynamicDto;
 import ru.glebdos.usermicroservice.dto.UserDto;
 import ru.glebdos.usermicroservice.model.User;
 import ru.glebdos.usermicroservice.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.regex.Pattern;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
         this.modelMapper = modelMapper;
     }
 
-
+    @Transactional
     @Override
     public void createUser(UserDto userDto) {
 
@@ -42,18 +42,16 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserByPhoneNumber(String phoneNumber) {
 
         checkFormatPhoneNumber(phoneNumber);
+        User user = findUserOrNotFound(phoneNumber);
 
-        User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("User not found " + phoneNumber));
 
         return convertUserToUserDto(user);
     }
-
+    @Transactional
     @Override
-    public void updateUser(PartialUpdateUserDto updateUserDto, String phoneNumber) {
+    public void updateUser(DynamicDto updateUserDto, String phoneNumber) {
         checkFormatPhoneNumber(phoneNumber);
-      User user =  userRepository.findByPhoneNumber(phoneNumber)
-              .orElseThrow(() -> new EntityNotFoundException("User not found " + phoneNumber));
+        User user = findUserOrNotFound(phoneNumber);
       LOGGER.info("founded user: {}", user);
         if (updateUserDto.getFirstName() != null) user.setFirstName(updateUserDto.getFirstName());
         if (updateUserDto.getSecondName() != null) user.setSecondName(updateUserDto.getSecondName());
@@ -64,13 +62,13 @@ public class UserServiceImpl implements UserService {
       userRepository.save(user);
 
     }
-
+    @Transactional
     @Override
     public void deleteUser(String phoneNumber) {
         checkFormatPhoneNumber(phoneNumber);
         LOGGER.info("deleting user: {}", phoneNumber);
         userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("User not found " + phoneNumber));
+                .orElseThrow(() -> new EntityNotFoundException(phoneNumber));
          userRepository.deleteUserByPhoneNumber(phoneNumber);
     }
 
@@ -89,6 +87,10 @@ public class UserServiceImpl implements UserService {
 
     private void checkFormatPhoneNumber(String phoneNumber) {
         if (!phoneNumber.matches("^\\+7[0-9]{10}$"))
-            throw new IllegalArgumentException("Неверный формат");
+            throw new IllegalArgumentException("Неправильный формат телефонного номера. Ожидаемый формат: +79219008833");
+    }
+    private User findUserOrNotFound(String phoneNumber) {
+      return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new EntityNotFoundException(phoneNumber));
     }
 }

@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import ru.glebdos.usermicroservice.dto.DynamicDto;
 import ru.glebdos.usermicroservice.dto.UserDto;
 import ru.glebdos.usermicroservice.model.User;
 import ru.glebdos.usermicroservice.repository.UserRepository;
@@ -80,7 +81,7 @@ public class UserServiceImplTest {
 
    @Test
     void getUserTest_shouldThrowEntityNotFoundException_whenUserDoesNotExist() {
-        String phoneNumber = "+799988";
+        String phoneNumber = "+79998887766";
 
         when(userRepository.findByPhoneNumber(phoneNumber)).thenThrow(EntityNotFoundException.class);
 
@@ -88,7 +89,61 @@ public class UserServiceImplTest {
     }
 
     @Test
-    void updateUserTest_shouldUpdateUser_whenUserExists() {}
+    void getUserTest_shouldThrowIllegalArgumentException_whenInvalidPhoneNumber() {
+        String invalidPhoneNumber = "+7986";
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class , () -> userService
+                .getUserByPhoneNumber(invalidPhoneNumber));
+
+        assertEquals("Неправильный формат телефонного номера. Ожидаемый формат: +79219008833", exception.getMessage());
+
+    }
+
+    @Test
+    void updateUserTest_shouldUpdatePartOfUser_whenUserExists() {
+        DynamicDto newDynamicDto = new DynamicDto();
+        newDynamicDto.setFirstName("Fred");
+        String phoneNumber = "+79998887766";
+        User user = new User("Frenk","Pink",
+                "fred@mail.ru",phoneNumber,"street 3");
+
+        when(userRepository.findByPhoneNumber(phoneNumber)).thenReturn(Optional.of(user));
+
+
+        userService.updateUser(newDynamicDto, phoneNumber);
+
+        verify(userRepository, times(1)).save(user);
+        assertEquals(newDynamicDto.getFirstName(), user.getFirstName());
+
+
+    }
+
+    @Test
+    void updateUserTest_shouldUpdateFullUser_whenUserExists() {
+        DynamicDto newDynamicDto = new DynamicDto("Fred","Yellow",
+                "frenk@gmail.com","+72287771488","street 4");
+        String phoneNumber = "+79998887766";
+        User user = new User("Frenk","Pink",
+                "fred@mail.ru",phoneNumber,"street 3");
+
+        when(userRepository.findByPhoneNumber(phoneNumber)).thenReturn(Optional.of(user));
+
+
+        userService.updateUser(newDynamicDto, phoneNumber);
+
+        verify(userRepository, times(1)).save(user);
+        assertEquals(newDynamicDto.getFirstName(), user.getFirstName());
+        assertEquals(newDynamicDto.getSecondName(), user.getSecondName());
+        assertEquals(newDynamicDto.getPhoneNumber(), user.getPhoneNumber());
+        assertEquals(newDynamicDto.getEmail(), user.getEmail());
+        assertEquals(newDynamicDto.getAddress(), user.getAddress());
+
+
+    }
+
+
+
+
 
 
 

@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.glebdos.usermicroservice.dto.PartialUpdateUserDto;
+import ru.glebdos.usermicroservice.dto.DynamicDto;
 import ru.glebdos.usermicroservice.dto.UserDto;
 import ru.glebdos.usermicroservice.service.UserService;
+
 
 @RestController
 @RequestMapping("/users")
@@ -25,7 +26,7 @@ public class UserController {
     }
 
 
-    @Transactional
+
     @PostMapping("/registration")
     public ResponseEntity<String> createUser(@RequestBody @Valid UserDto userDto) {
         userService.createUser(userDto);
@@ -33,30 +34,30 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<UserDto> getUserByPhoneNumber(@RequestBody @Valid String phoneNumber) {
+    public ResponseEntity<UserDto> getUserByPhoneNumber(@RequestParam String phoneNumber) {
 
         return ResponseEntity.ok(userService.getUserByPhoneNumber(phoneNumber));
 
     }
 
-    @Transactional
-    @PostMapping("/update/{phoneNumber}")
-    public ResponseEntity<String> updateUser(@RequestBody @Valid PartialUpdateUserDto updateUserDto,
-                                                  @PathVariable String phoneNumber) {
+
+    @PostMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestBody @Valid DynamicDto updateUserDto,
+                                                   @RequestParam String phoneNumber) {
         LOGGER.info("Number here : {}",phoneNumber);
 
         LOGGER.info("User here : {}", updateUserDto);
         userService.updateUser(updateUserDto, phoneNumber);
 
-        return ResponseEntity.ok("User updated");
+        return ResponseEntity.ok("Пользователь обновлен");
 
     }
 
-    @Transactional
-    @DeleteMapping("/delete{phoneNumber}")
-    public ResponseEntity<String> deleteUser(@PathVariable String phoneNumber) {
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser(@RequestParam String phoneNumber) {
         userService.deleteUser(phoneNumber);
-        return ResponseEntity.ok("User deleted");
+        return ResponseEntity.ok("Пользователь удален");
     }
 
 
