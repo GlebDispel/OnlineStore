@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
     //ловит исключения, связанные с нарушением валидации полей
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    private ResponseEntity<ClientErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ClientErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
         StringBuilder errorMessage = new StringBuilder();
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
         for (FieldError fieldError : fieldErrors) {
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
 
     //Ловит ошибки, возникающие при неверном формате тела запроса, например, синтаксические ошибки JSON.
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    private ResponseEntity<ClientErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public ResponseEntity<ClientErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         LOGGER.info("HttpMessageNotReadableException: {}", e.getMessage());
         ClientErrorResponse response = new ClientErrorResponse(
                 "Ошибка в запросе",
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
 
     // Ловит ошибки, связанные с отсутствием объекта в базе данных
     @ExceptionHandler(EntityNotFoundException.class)
-    private ResponseEntity<ClientErrorResponse> handleEntityNotFoundException(EntityNotFoundException e) {
+    public ResponseEntity<ClientErrorResponse> handleEntityNotFoundException(EntityNotFoundException e) {
         LOGGER.info("Entity number: {}", e.getMessage());
 
          ClientErrorResponse patternResponse = new ClientErrorResponse(

@@ -1,23 +1,19 @@
-package ru.glebdos.usermicroservice.service;
+package ru.glebdos.usermicroservice.unittest.service;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import ru.glebdos.usermicroservice.dto.DynamicDto;
 import ru.glebdos.usermicroservice.dto.UserDto;
 import ru.glebdos.usermicroservice.model.User;
 import ru.glebdos.usermicroservice.repository.UserRepository;
+import ru.glebdos.usermicroservice.service.UserServiceImpl;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,17 +29,22 @@ public class UserServiceImplTest {
     @Mock
     private ModelMapper modelMapper;
 
+    private UserDto userDto;
+    private User user;
 
 
+@BeforeEach
+void setUp() {
+    userDto = new UserDto(
+            "Fred","Pink",
+            "fred@mail.ru","+79998887766","street 3");
+    user = new User("Fred","Pink",
+            "fred@mail.ru","+79998887766","street 3");
+}
 
     @Test
+    @DisplayName("Успешное создание пользователя при коректных данных")
     void createUserTest_shouldCreateUser_whenUserValid() {
-
-      UserDto userDto = new UserDto(
-                "Fred","Pink",
-                "fred@mail.ru","+79998887766","street 3");
-      User user = new User("Fred","Pink",
-              "fred@mail.ru","+79998887766","street 3");
 
         when(modelMapper.map(userDto, User.class)).thenReturn(user);
 
@@ -56,13 +57,9 @@ public class UserServiceImplTest {
     }
 
    @Test
+   @DisplayName("Получение пользователя,если он существует")
     void getUserTest_shouldReturnUser_whenUserExists() {
         String phoneNumber = "+79998887766";
-       User user = new User("Fred","Pink",
-               "fred@mail.ru",phoneNumber,"street 3");
-       UserDto userDto = new UserDto(
-               "Fred","Pink",
-               "fred@mail.ru","+79998887766","street 3");
 
        when(userRepository.findByPhoneNumber(phoneNumber)).thenReturn(Optional.of(user));
        when(modelMapper.map(user, UserDto.class)).thenReturn(userDto);
@@ -80,6 +77,7 @@ public class UserServiceImplTest {
    }
 
    @Test
+   @DisplayName("Ошибка,если пользователь не существует")
     void getUserTest_shouldThrowEntityNotFoundException_whenUserDoesNotExist() {
         String phoneNumber = "+79998887766";
 
@@ -89,6 +87,7 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Ошибка,если неверный формат телефона")
     void getUserTest_shouldThrowIllegalArgumentException_whenInvalidPhoneNumber() {
         String invalidPhoneNumber = "+7986";
 
@@ -100,12 +99,12 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Частичное обновление,если пользователь существует")
     void updateUserTest_shouldUpdatePartOfUser_whenUserExists() {
         DynamicDto newDynamicDto = new DynamicDto();
         newDynamicDto.setFirstName("Fred");
+
         String phoneNumber = "+79998887766";
-        User user = new User("Frenk","Pink",
-                "fred@mail.ru",phoneNumber,"street 3");
 
         when(userRepository.findByPhoneNumber(phoneNumber)).thenReturn(Optional.of(user));
 
@@ -119,12 +118,12 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Полное обновление,если пользователь существует")
     void updateUserTest_shouldUpdateFullUser_whenUserExists() {
         DynamicDto newDynamicDto = new DynamicDto("Fred","Yellow",
                 "frenk@gmail.com","+72287771488","street 4");
         String phoneNumber = "+79998887766";
-        User user = new User("Frenk","Pink",
-                "fred@mail.ru",phoneNumber,"street 3");
+
 
         when(userRepository.findByPhoneNumber(phoneNumber)).thenReturn(Optional.of(user));
 
@@ -138,6 +137,20 @@ public class UserServiceImplTest {
         assertEquals(newDynamicDto.getEmail(), user.getEmail());
         assertEquals(newDynamicDto.getAddress(), user.getAddress());
 
+
+    }
+
+    @Test
+    @DisplayName("Удаление,если пользователь существует")
+    void deleteUserTest_shouldDeleteUser_whenUserExists (){
+        String phoneNumber = "+79998887766";
+
+
+        when(userRepository.findByPhoneNumber(phoneNumber)).thenReturn(Optional.of(user));
+
+        userService.deleteUser(phoneNumber);
+
+        verify(userRepository, times(1)).deleteUserByPhoneNumber(phoneNumber);
 
     }
 

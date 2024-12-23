@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +28,10 @@ public class UserController {
 
 
 
-    @PostMapping("/registration")
+    @PostMapping(value = "/registration",produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> createUser(@RequestBody @Valid UserDto userDto) {
         userService.createUser(userDto);
-        return ResponseEntity.ok("User created");
+        return ResponseEntity.ok("Пользователь создан");
     }
 
     @GetMapping("/search")
