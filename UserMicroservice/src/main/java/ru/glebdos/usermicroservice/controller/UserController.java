@@ -30,6 +30,7 @@ public class UserController {
 
     @PostMapping(value = "/registration",produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> createUser(@RequestBody @Valid UserDto userDto) {
+        LOGGER.info("Creating user: {}", userDto);
         userService.createUser(userDto);
         return ResponseEntity.ok("Пользователь создан");
     }

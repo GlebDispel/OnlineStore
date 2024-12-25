@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class UserDto {
 
 
-    @NotNull()
+    @NotNull
     @Size(min = 2, max = 50)
     private String firstName;
 

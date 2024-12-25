@@ -1,8 +1,12 @@
 package ru.glebdos.usermicroservice.util;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -10,6 +14,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
@@ -31,6 +37,7 @@ public class GlobalExceptionHandler {
     //ловит исключения, связанные с нарушением валидации полей
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ClientErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        LOGGER.info("Хендлер вызван: {}", e.getMessage());
         StringBuilder errorMessage = new StringBuilder();
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
         for (FieldError fieldError : fieldErrors) {
@@ -43,6 +50,7 @@ public class GlobalExceptionHandler {
                 errorMessage.toString(),
                 System.currentTimeMillis()
         );
+        LOGGER.info(response.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -70,6 +78,17 @@ public class GlobalExceptionHandler {
             );
             return new ResponseEntity<>(patternResponse, HttpStatus.NOT_FOUND);
 
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ClientErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        LOGGER.info("IllegalArgumentException: {}", e.getMessage());
+        ClientErrorResponse response = new ClientErrorResponse(
+                e.getMessage(),
+                System.currentTimeMillis()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 
