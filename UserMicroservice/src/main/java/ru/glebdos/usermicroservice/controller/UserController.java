@@ -43,7 +43,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/update")
+    @PostMapping(value = "/update", produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> updateUser(@RequestBody @Valid DynamicDto updateUserDto,
                                                    @RequestParam String phoneNumber) {
         LOGGER.info("Number here : {}",phoneNumber);
@@ -56,7 +56,7 @@ public class UserController {
     }
 
 
-    @DeleteMapping("/delete")
+    @DeleteMapping(value = "/delete",produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> deleteUser(@RequestParam String phoneNumber) {
         userService.deleteUser(phoneNumber);
         return ResponseEntity.ok("Пользователь удален");

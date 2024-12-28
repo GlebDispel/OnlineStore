@@ -43,7 +43,7 @@ public class User {
     @Size(max = 100)
     private String address;
     @NotNull
-    @Column(name = "registration_time")
+    @Column(name = "registration_time",updatable = false)
     private LocalDateTime userRegistrationTime;
 
     public User(String firstName, String secondName, String email, String phoneNumber, String address ) {

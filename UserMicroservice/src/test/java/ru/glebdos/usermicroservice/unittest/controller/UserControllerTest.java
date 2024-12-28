@@ -11,26 +11,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import org.springframework.web.bind.MethodArgumentNotValidException;
+
 import ru.glebdos.usermicroservice.controller.UserController;
+import ru.glebdos.usermicroservice.dto.DynamicDto;
 import ru.glebdos.usermicroservice.dto.UserDto;
 import ru.glebdos.usermicroservice.service.UserService;
-import ru.glebdos.usermicroservice.util.ClientErrorResponse;
 import ru.glebdos.usermicroservice.util.GlobalExceptionHandler;
 
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -39,27 +33,23 @@ public class UserControllerTest {
 
 
     private MockMvc mockMvc;
-
     @Mock
     private UserService userService;
-
     @InjectMocks
     private UserController userController;
-    @Mock
-    private GlobalExceptionHandler globalExceptionHandler;
-
     private ObjectMapper objectMapper;
-
     private UserDto validUserDto;
 
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
         objectMapper = new ObjectMapper();
         validUserDto = new UserDto(
-                "John", "Doe", "john.doe@example.com", "+79219008833", "123 Main St");
+                "John", "Doe", "john.doe@example.com",
+                "+79219008833", "123 Main St");
     }
 
     @Test
@@ -67,7 +57,6 @@ public class UserControllerTest {
     @SneakyThrows
     void createUser_ShouldReturnOk_WhenValidUserDto() {
         String jsonContent = objectMapper.writeValueAsString(validUserDto);
-
 
         mockMvc.perform(post("/users/registration")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,7 +70,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Ошибка, не задано имя пользователя")
+    @DisplayName("Ошибка создания, не задано имя пользователя")
     @SneakyThrows
     void createUser_shouldReturnBadRequest_WhenFirstNameIsNull() {
 
@@ -90,62 +79,55 @@ public class UserControllerTest {
 
         String jsonContent = objectMapper.writeValueAsString(invalidUserDto);
 
-        MvcResult result = mockMvc.perform(post("/users/registration")
+        mockMvc.perform(post("/users/registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonContent))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("firstName - must not be null"))
                 .andReturn();
 
-
-        Exception exception = result.getResolvedException();
-        ;
-
-        assertNotNull(exception);
-        assertInstanceOf(MethodArgumentNotValidException.class, exception);
         verify(userService, never()).createUser(validUserDto);
 
     }
 
     @Test
-    @DisplayName("Ошибка, неверный формат номера телефона")
+    @DisplayName("Ошибка создания, неверный формат номера телефона")
     @SneakyThrows
-    void createUser_shouldReturnBadRequest_whenWrongPhoneNumberFormat() {
+    void createUser_shouldReturnBadRequest_whenInvalidPhoneNumber() {
         UserDto invalidUserDto = validUserDto;
         invalidUserDto.setPhoneNumber("+09281234");
         String jsonContent = objectMapper.writeValueAsString(invalidUserDto);
 
-        MvcResult result = mockMvc.perform(post("/users/registration")
+        mockMvc.perform(post("/users/registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonContent))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("phoneNumber - Неправильный формат телефонного номера. " +
+                                "Ожидаемый формат: +79219008833"))
                 .andReturn();
 
-        Exception exception = result.getResolvedException();
-
-        assertNotNull(exception);
-        assertInstanceOf(MethodArgumentNotValidException.class, exception);
         verify(userService, never()).createUser(validUserDto);
+
 
     }
 
     @Test
-    @DisplayName("Ошибка, неверный формат почты")
+    @DisplayName("Ошибка создания, неверный формат почты")
     @SneakyThrows
-    void createUser_shouldReturnBadRequest_whenWrongEmailFormat() {
+    void createUser_shouldReturnBadRequest_whenInvalidEmail() {
         UserDto invalidUserDto = validUserDto;
         invalidUserDto.setEmail("some email");
         String jsonContent = objectMapper.writeValueAsString(invalidUserDto);
 
-        MvcResult result = mockMvc.perform(post("/users/registration")
+        mockMvc.perform(post("/users/registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonContent))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("email - must be a well-formed email address"))
                 .andReturn();
 
-        Exception exception = result.getResolvedException();
-
-        assertNotNull(exception);
-        assertInstanceOf(MethodArgumentNotValidException.class, exception);
         verify(userService, never()).createUser(validUserDto);
 
     }
@@ -159,7 +141,7 @@ public class UserControllerTest {
         when(userService.getUserByPhoneNumber(phoneNumber)).thenReturn(validUserDto);
 
         mockMvc.perform(get("/users/search")
-                        .param("phoneNumber",phoneNumber)
+                        .param("phoneNumber", phoneNumber)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -169,25 +151,271 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.email").value(validUserDto.getEmail()))
                 .andExpect(jsonPath("$.address").value(validUserDto.getAddress()));
 
-        verify(userService,times(1)).getUserByPhoneNumber(phoneNumber);
+        verify(userService, times(1)).getUserByPhoneNumber(phoneNumber);
     }
 
     @Test
-    @DisplayName("Ошибка, неверный формат номера телефона")
+    @DisplayName("Ошибка получения, неверный формат номера телефона")
     @SneakyThrows
-    void getUserByPhoneNumber_shouldReturnBadRequest_whenWrongPhoneNumberFormat() {
-        String invalidPhoneNumber = "123456789";
-        when(userService.getUserByPhoneNumber(invalidPhoneNumber))
-                .thenThrow(new IllegalArgumentException("Неправильный формат телефонного номера. Ожидаемый формат: +79219008833"));
+    void getUserByPhoneNumber_shouldReturnBadRequest_whenInvalidPhoneNumber() {
+        String invalidPhoneNumber = "12345";
+        String illegalArgumentExceptionMessage = "Неправильный формат телефонного номера. Ожидаемый формат: +79219008833";
+
+        doThrow(new IllegalArgumentException(illegalArgumentExceptionMessage))
+                .when(userService).getUserByPhoneNumber(anyString());
 
         mockMvc.perform(get("/users/search")
                         .param("phoneNumber", invalidPhoneNumber)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        //возвращает 200 . нужно исправить.
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value(illegalArgumentExceptionMessage));
 
     }
 
+    @Test
+    @DisplayName("Ошибка получения, отсуствует обязательный параметр")
+    @SneakyThrows
+    void getUserByPhoneNumber_shouldReturnBadRequest_whenNullParameter() {
 
+
+        mockMvc.perform(get("/users/search")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Required request parameter 'phoneNumber' " +
+                                "for method parameter type String is not present"))
+                .andReturn();
+
+
+    }
+
+    @Test
+    @DisplayName("Ошибка получения, пользователь отсутствует")
+    @SneakyThrows
+    void getUserByPhoneNumber_shouldReturnEntityNotFound_whenUserNotFound() {
+        String phoneNumber = "+7770001122";
+        doThrow(new EntityNotFoundException(phoneNumber))
+                .when(userService).getUserByPhoneNumber(phoneNumber);
+
+        mockMvc.perform(get("/users/search")
+                        .param("phoneNumber", phoneNumber)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("Пользователь c номером " + phoneNumber + " не найден"));
+
+
+    }
+
+    @Test
+    @DisplayName("Успешное полное обновление пользователя")
+    @SneakyThrows
+    void updateUser_shouldReturnOk_WhenFullUserUpdated() {
+        String phoneNumber = validUserDto.getPhoneNumber();
+        DynamicDto updatedUserDto = new DynamicDto("Gleb", "Chalov", "gleb@gmail.com",
+                "+77777777777", "anything 17");
+        String jsonContent = objectMapper.writeValueAsString(updatedUserDto);
+
+
+        mockMvc.perform(post("/users/update")
+                        .param("phoneNumber", phoneNumber)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Пользователь обновлен"));
+    }
+
+    @Test
+    @DisplayName("Успешное частичное обновление пользователя")
+    @SneakyThrows
+    void updateUser_shouldReturnOk_whenPartialUserUpdated() {
+        String phoneNumber = validUserDto.getPhoneNumber();
+        DynamicDto updatedUserDto = new DynamicDto();
+        updatedUserDto.setFirstName("Gleb");
+        String jsonContent = objectMapper.writeValueAsString(updatedUserDto);
+
+
+        mockMvc.perform(post("/users/update")
+                        .param("phoneNumber", phoneNumber)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Пользователь обновлен"));
+    }
+
+    @Test
+    @DisplayName("Ошибка обновления, пользователь не найден")
+    @SneakyThrows
+    void updateUser_shouldReturnEntityNotFound_whenUserNotFound() {
+        String phoneNumber = "+7770001122";
+
+        DynamicDto updatedUserDto = new DynamicDto();
+        updatedUserDto.setFirstName("Gleb");
+
+        String jsonContent = objectMapper.writeValueAsString(updatedUserDto);
+
+        doThrow(new EntityNotFoundException(phoneNumber))
+                .when(userService).updateUser(updatedUserDto, phoneNumber);
+
+        mockMvc.perform(post("/users/update")
+                        .param("phoneNumber", phoneNumber)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("Пользователь c номером " + phoneNumber + " не найден"));
+
+    }
+
+    @Test
+    @DisplayName("Ошибка обновления, неверный формат номера телефона")
+    @SneakyThrows
+    void updateUser_ShouldReturnBadRequest_whenInvalidPhoneNumber() {
+        String phoneNumber = "12345";
+        String illegalArgumentExceptionMessage = "Неправильный формат телефонного номера. Ожидаемый формат: +79219008833";
+
+        DynamicDto updatedUserDto = new DynamicDto();
+        updatedUserDto.setFirstName("Gleb");
+
+        String jsonContent = objectMapper.writeValueAsString(updatedUserDto);
+
+        doThrow(new IllegalArgumentException(illegalArgumentExceptionMessage))
+                .when(userService).updateUser(updatedUserDto, phoneNumber);
+
+        mockMvc.perform(post("/users/update")
+                        .param("phoneNumber", phoneNumber)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value(illegalArgumentExceptionMessage));
+
+
+    }
+
+    @Test
+    @DisplayName("Ошибка обновления, отсуствует обязательный параметр")
+    @SneakyThrows
+    void updateUser_shouldReturnBadRequest_whenNullParameter() {
+
+        DynamicDto updatedUserDto = new DynamicDto();
+        updatedUserDto.setFirstName("Gleb");
+        String jsonContent = objectMapper.writeValueAsString(updatedUserDto);
+
+        mockMvc.perform(post("/users/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Required request parameter 'phoneNumber' " +
+                                "for method parameter type String is not present"))
+                .andReturn();
+
+        verify(userService, never()).updateUser(updatedUserDto, null);
+    }
+
+    @Test
+    @DisplayName("Ошибка обновления, неверный формат почты")
+    @SneakyThrows
+    void updateUser_shouldReturnBadRequest_whenInvalidEmail() {
+        String phoneNumber = "+7770001122";
+        DynamicDto updatedUserDto = new DynamicDto();
+        updatedUserDto.setEmail("jiga-driga");
+        String jsonContent = objectMapper.writeValueAsString(updatedUserDto);
+
+        mockMvc.perform(post("/users/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("phoneNumber", phoneNumber)
+                        .content(jsonContent))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("email - must be a well-formed email address"));
+    }
+
+    @Test
+    @DisplayName("Ошибка обновления, пустое тело запроса")
+    @SneakyThrows
+    void updateUser_shouldReturnBadRequest_whenEmptyBodyRequest() {
+        String phoneNumber = "+7770001122";
+        DynamicDto updatedUserDto = new DynamicDto();
+        String jsonContent = objectMapper.writeValueAsString(updatedUserDto);
+
+        mockMvc.perform(post("/users/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("phoneNumber", phoneNumber)
+                        .content(jsonContent))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("valid - Для обновления должно быть указано хотя бы одно поле"));
+
+    }
+
+    @Test
+    @DisplayName("Успешное удаление пользователя")
+    @SneakyThrows
+    void deleteUser_shouldReturnOk_whenUserDeleted() {
+        String phoneNumber = "+7770001122";
+
+        mockMvc.perform(delete("/users/delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("phoneNumber", phoneNumber))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Пользователь удален"));
+
+        verify(userService, times(1)).deleteUser(phoneNumber);
+    }
+
+    @Test
+    @DisplayName("Ошибка удаления, пользователь не найден")
+    @SneakyThrows
+    void deleteUser_shouldReturnEntityNotFound_whenUserNotFound() {
+        String phoneNumber = "+7770001122";
+
+        doThrow(new EntityNotFoundException(phoneNumber)).when(userService).deleteUser(phoneNumber);
+
+        mockMvc.perform(delete("/users/delete")
+                        .param("phoneNumber", phoneNumber)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("Пользователь c номером " + phoneNumber + " не найден"));
+
+    }
+
+    @Test
+    @DisplayName("Ошибка удаления, неверный формат номера телефона")
+    @SneakyThrows
+    void deleteUser_shouldReturnBadRequest_whenInvalidPhoneNumber() {
+        String invalidPhoneNumber = "12345";
+        String illegalArgumentExceptionMessage = "Неправильный формат телефонного номера. Ожидаемый формат: +79219008833";
+
+
+        doThrow(new IllegalArgumentException(illegalArgumentExceptionMessage))
+                .when(userService).deleteUser(invalidPhoneNumber);
+
+        mockMvc.perform(delete("/users/delete")
+                        .param("phoneNumber", invalidPhoneNumber)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value(illegalArgumentExceptionMessage));
+    }
+
+
+    @Test
+    @DisplayName("Ошибка удаления, отсутствует обязательный параметр")
+    @SneakyThrows
+    void deleteUser_shouldReturnBadRequest_whenNullParameter() {
+
+        mockMvc.perform(delete("/users/delete")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Required request parameter 'phoneNumber' " +
+                        "for method parameter type String is not present"));
+    }
+
+
+
+    // добавить тест на регистрацию пользователя с данными, которые уже есть в базе
 }

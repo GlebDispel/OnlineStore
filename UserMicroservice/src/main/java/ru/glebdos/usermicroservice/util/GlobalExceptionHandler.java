@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -37,14 +38,13 @@ public class GlobalExceptionHandler {
     //ловит исключения, связанные с нарушением валидации полей
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ClientErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
-        LOGGER.info("Хендлер вызван: {}", e.getMessage());
+        LOGGER.info("MethodArgumentNotValidException here : {}", e.getMessage());
         StringBuilder errorMessage = new StringBuilder();
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
         for (FieldError fieldError : fieldErrors) {
             errorMessage.append(fieldError.getField())
                     .append(" - ")
-                    .append(fieldError.getDefaultMessage())
-                    .append(";");
+                    .append(fieldError.getDefaultMessage());
         }
         ClientErrorResponse response = new ClientErrorResponse(
                 errorMessage.toString(),
@@ -85,6 +85,17 @@ public class GlobalExceptionHandler {
         LOGGER.info("IllegalArgumentException: {}", e.getMessage());
         ClientErrorResponse response = new ClientErrorResponse(
                 e.getMessage(),
+                System.currentTimeMillis()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ClientErrorResponse> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        LOGGER.info("MissingServletRequestParameterException: {}", e.getMessage());
+        ClientErrorResponse response = new ClientErrorResponse(
+                e.getLocalizedMessage(),
                 System.currentTimeMillis()
         );
 
