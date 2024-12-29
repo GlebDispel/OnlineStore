@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void createUser(UserDto userDto) {
-
+        LOGGER.info("Сервис создания вызван");
         User localUser = convertUserDtoToUser(userDto);
         setTimeRegistration(localUser);
         userRepository.save(localUser);

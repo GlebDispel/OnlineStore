@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -67,6 +68,35 @@ public class UserControllerTest {
 
         verify(userService, times(1)).createUser(validUserDto);
 
+    }
+
+    @Test
+    @DisplayName("Ошибка, пользователь с таким мылом уже существует")
+    @SneakyThrows
+    void createUser_shouldReturnConflict_whenEmailAlreadyExists() {
+        String jsonContent = objectMapper.writeValueAsString(validUserDto);
+        String exceptionMessage = "Пользователь с таким электронным адресом уже существует";
+
+        doThrow(new DataIntegrityViolationException(exceptionMessage)).when(userService).createUser(validUserDto);
+        mockMvc.perform(post("/users/registration")
+        .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonContent))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(exceptionMessage));
+    }
+    @Test
+    @DisplayName("Ошибка, пользователь с таким номером телефона уже существует")
+    @SneakyThrows
+    void createUser_shouldReturnConflict_whenPhoneNumberAlreadyExists() {
+        String jsonContent = objectMapper.writeValueAsString(validUserDto);
+        String exceptionMessage = "Пользователь с таким номером телефона уже существует";
+
+        doThrow(new DataIntegrityViolationException(exceptionMessage)).when(userService).createUser(validUserDto);
+        mockMvc.perform(post("/users/registration")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(exceptionMessage));
     }
 
     @Test
@@ -417,5 +447,5 @@ public class UserControllerTest {
 
 
 
-    // добавить тест на регистрацию пользователя с данными, которые уже есть в базе
+
 }
