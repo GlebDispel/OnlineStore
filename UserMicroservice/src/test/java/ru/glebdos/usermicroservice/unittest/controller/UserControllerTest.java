@@ -50,7 +50,7 @@ public class UserControllerTest {
         objectMapper = new ObjectMapper();
         validUserDto = new UserDto(
                 "John", "Doe", "john.doe@example.com",
-                "+79219008833", "123 Main St");
+                "+79219008833", "123 Main St","1234567");
     }
 
     @Test

@@ -37,7 +37,7 @@ public class UserServiceImplTest {
 void setUp() {
     userDto = new UserDto(
             "Fred","Pink",
-            "fred@mail.ru","+79998887766","street 3");
+            "fred@mail.ru","+79998887766","street 3","1234567");
     user = new User("Fred","Pink",
             "fred@mail.ru","+79998887766","street 3");
 }

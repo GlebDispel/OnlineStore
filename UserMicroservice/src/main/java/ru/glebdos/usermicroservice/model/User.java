@@ -46,6 +46,14 @@ public class User {
     @Column(name = "registration_time",updatable = false)
     private LocalDateTime userRegistrationTime;
 
+    @Column(name = "password")
+    private String password;
+
+//    private String password;
+
+//    @Enumerated(EnumType.STRING)
+//    private Role role;
+
     public User(String firstName, String secondName, String email, String phoneNumber, String address ) {
         this.firstName = firstName;
         this.secondName = secondName;

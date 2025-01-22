@@ -1,12 +1,8 @@
 package ru.glebdos.usermicroservice.util;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.ModelAndView;
 
-import java.sql.SQLException;
+
 import java.util.List;
 
 @ControllerAdvice
@@ -37,7 +31,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    //ловит исключения, связанные с нарушением валидации полей
+   // ловит исключения, связанные с нарушением валидации полей
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ClientErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
         LOGGER.error("MethodArgumentNotValidException here : {}", e.getMessage());

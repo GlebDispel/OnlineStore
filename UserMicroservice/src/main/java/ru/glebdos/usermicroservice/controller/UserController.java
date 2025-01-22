@@ -1,19 +1,20 @@
 package ru.glebdos.usermicroservice.controller;
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.glebdos.usermicroservice.dto.DynamicDto;
 import ru.glebdos.usermicroservice.dto.UserDto;
 import ru.glebdos.usermicroservice.service.UserService;
 
 
+@Tag(name = "main_methods")
 @RestController
 @RequestMapping("/users")
 public class UserController {
