@@ -2,10 +2,13 @@ package ru.glebdos.usermicroservice.service;
 
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.websocket.SendResult;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,6 +22,7 @@ import ru.glebdos.usermicroservice.model.User;
 import ru.glebdos.usermicroservice.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -28,29 +32,27 @@ public class UserServiceImpl implements UserService , UserDetailsService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final SecurityConfig securityConfig = new SecurityConfig();
+    private final KafkaTemplate<String,Integer> kafkaTemplate;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
+    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, KafkaTemplate<String, Integer> kafkaTemplate) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Transactional
     @Override
-    public void createUser(UserDto userDto) {
+    public void createUser(UserDto userDto) throws ExecutionException, InterruptedException {
 
         LOGGER.info("Сервис создания вызван");
         String encodedPassword = securityConfig.passwordEncoder().encode(userDto.getPassword());
         User localUser = convertUserDtoToUser(userDto);
-
         localUser.setPassword(encodedPassword);
-
-
-//        localUser.setRole(Role.USER);
-
         setTimeRegistration(localUser);
-        userRepository.save(localUser);
-
+       User savedUser = userRepository.save(localUser);
+      var lol =  kafkaTemplate.send("user-created-topic", savedUser.getId()).get();
+        LOGGER.info(lol.toString());
     }
 
     @Override

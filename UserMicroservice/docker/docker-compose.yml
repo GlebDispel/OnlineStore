@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   app:
-    image: '4d501b6c1ce8'
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: UserMicroservice
     expose:
       - '8000'
@@ -12,7 +14,10 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=123456
       - DB_URL=jdbc:postgresql://db:5432/client_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9094,kafka-3:9096
       - SPRING_PROFILES_ACTIVE=debug
+    networks:
+      - my-network
     depends_on:
       - db
   db:
@@ -20,9 +25,16 @@ services:
     container_name: db
     expose:
       - '5432'
+    ports:
+      - '5432:5432'
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
       - POSTGRES_DB=client_db
     volumes:
       - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - my-network
+networks:
+  my-network:
+    external: true
