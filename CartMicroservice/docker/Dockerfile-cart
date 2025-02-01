@@ -1,0 +1,8 @@
+FROM openjdk:22
+
+ARG APP_JAR=*.jar
+
+
+COPY ${APP_JAR} CartMicroservice.jar
+
+ENTRYPOINT ["java", "-jar", "CartMicroservice.jar"]
