@@ -15,7 +15,6 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36" />
         </processorPath>
-        <module name="ProductMicroservice" />
       </profile>
       <profile name="Annotation profile for UserMicroservice" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -25,8 +24,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36" />
         </processorPath>
-        <module name="CartMicroservice" />
-        <module name="UserMicroservice" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
