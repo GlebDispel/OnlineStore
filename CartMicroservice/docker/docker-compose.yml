@@ -1,0 +1,40 @@
+services:
+  cart-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-cart
+    container_name: CartMicroservice
+    expose:
+      - '8001'
+    ports:
+      - '8001:8001'
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_URL=jdbc:postgresql://cart-db:5432/cart_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9094,kafka-3:9096
+      - SPRING_PROFILES_ACTIVE=debug
+    networks:
+      - my-network
+    depends_on:
+      - cart-db
+
+  cart-db:
+    image: 'postgres'
+    container_name: cart-db
+    expose:
+      - '5432'
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=cart_db
+    volumes:
+      - ./cart-db-init:/docker-entrypoint-initdb.d
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    external: true
