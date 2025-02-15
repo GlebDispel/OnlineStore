@@ -3,7 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
     <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>logstash_springboot:5000</destination>
+        <destination>localhost:5000</destination>
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <mdc />
@@ -13,7 +13,7 @@
                 <pattern>
                     <pattern>
                         {
-                        "app": "product"
+                        "app": "user"
                         }
                     </pattern>
                 </pattern>

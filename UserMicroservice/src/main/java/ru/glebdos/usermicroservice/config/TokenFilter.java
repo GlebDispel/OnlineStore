@@ -38,7 +38,7 @@ public class TokenFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         log.info("TokenFilter");
         String jwt = null;
-        String username = null;
+        String email = null;
         UserDetails userDetails = null;
         UsernamePasswordAuthenticationToken authenticationToken = null;
 
@@ -50,13 +50,13 @@ public class TokenFilter extends OncePerRequestFilter {
             }
             if (jwt != null) {
                 try {
-                    username = jwtCore.getNameFromJwtToken(jwt);
+                    email = jwtCore.getNameFromJwtToken(jwt);
                 }
                 catch (ExpiredJwtException e){
                     log.error("JWT token expired: {}", e.getMessage(), e);
                 }
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    userDetails = userDetailsService.loadUserByUsername(username);
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    userDetails = userDetailsService.loadUserByUsername(email);
                     authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,null);
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     log.info("Authentication Success");

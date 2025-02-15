@@ -1,11 +1,13 @@
 package ru.glebdos.ws.productmicroservice.service;
 
+import org.springframework.stereotype.Service;
 import ru.glebdos.ws.productmicroservice.dto.ProductDTO;
 import ru.glebdos.ws.productmicroservice.model.Product;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public interface ProductService {
 
     List<Product> getAllProducts();

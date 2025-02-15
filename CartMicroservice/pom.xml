@@ -68,6 +68,11 @@
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>7.2</version>
 		</dependency>
+		<dependency>
+			<groupId>ru.glebdos.ws</groupId>
+			<artifactId>core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -26,13 +26,13 @@ import java.util.concurrent.ExecutionException;
 
 
 @Service
-public class UserServiceImpl implements UserService , UserDetailsService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final SecurityConfig securityConfig = new SecurityConfig();
-    private final KafkaTemplate<String,Integer> kafkaTemplate;
+    private final KafkaTemplate<String, Integer> kafkaTemplate;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, KafkaTemplate<String, Integer> kafkaTemplate) {
@@ -50,9 +50,9 @@ public class UserServiceImpl implements UserService , UserDetailsService {
         User localUser = convertUserDtoToUser(userDto);
         localUser.setPassword(encodedPassword);
         setTimeRegistration(localUser);
-       User savedUser = userRepository.save(localUser);
-      var lol =  kafkaTemplate.send("user-created-topic", savedUser.getId()).get();
-        LOGGER.info(lol.toString());
+        User savedUser = userRepository.save(localUser);
+        var kafkaMessage = kafkaTemplate.send("user-created-topic", savedUser.getId()).get();
+        LOGGER.info("message from kafka: {}" , kafkaMessage.toString());
     }
 
     @Override
@@ -64,21 +64,23 @@ public class UserServiceImpl implements UserService , UserDetailsService {
 
         return convertUserToUserDto(user);
     }
+
     @Transactional
     @Override
     public void updateUser(DynamicDto updateUserDto, String phoneNumber) {
         checkFormatPhoneNumber(phoneNumber);
         User user = findUserOrNotFound(phoneNumber);
-      LOGGER.info("founded user: {}", user);
+        LOGGER.info("founded user: {}", user);
         if (updateUserDto.getFirstName() != null) user.setFirstName(updateUserDto.getFirstName());
         if (updateUserDto.getSecondName() != null) user.setSecondName(updateUserDto.getSecondName());
         if (updateUserDto.getEmail() != null) user.setEmail(updateUserDto.getEmail());
         if (updateUserDto.getAddress() != null) user.setAddress(updateUserDto.getAddress());
         if (updateUserDto.getPhoneNumber() != null) user.setPhoneNumber(updateUserDto.getPhoneNumber());
         LOGGER.info("updated user: {}", user);
-      userRepository.save(user);
+        userRepository.save(user);
 
     }
+
     @Transactional
     @Override
     public void deleteUser(String phoneNumber) {
@@ -86,7 +88,7 @@ public class UserServiceImpl implements UserService , UserDetailsService {
         LOGGER.info("deleting user: {}", phoneNumber);
         userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new EntityNotFoundException(phoneNumber));
-         userRepository.deleteUserByPhoneNumber(phoneNumber);
+        userRepository.deleteUserByPhoneNumber(phoneNumber);
     }
 
 
@@ -106,16 +108,17 @@ public class UserServiceImpl implements UserService , UserDetailsService {
         if (!phoneNumber.matches("^\\+7[0-9]{10}$"))
             throw new IllegalArgumentException("Неправильный формат телефонного номера. Ожидаемый формат: +79219008833");
     }
+
     private User findUserOrNotFound(String phoneNumber) {
-      return userRepository.findByPhoneNumber(phoneNumber)
+        return userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new EntityNotFoundException(phoneNumber));
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        LOGGER.info("loadUserByUsername вызван, передеанный аргумент  {}", username);
-        User user = userRepository.findUserByFirstName(username)
-                .orElseThrow(() -> new EntityNotFoundException("not found user: " + username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        LOGGER.info("loadUserByUsername вызван, передеанный аргумент  {}", email);
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("not found user: " + email));
         return UserDetailsImpl.build(user);
     }
 
