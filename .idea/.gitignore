@@ -7,3 +7,7 @@
 /dataSources/
 /dataSources.local.xml
 .idea/
+core/.idea
+CourierMicroservice/.idea
+OrderMicroservice/.idea
+ProductMicroservice/.idea
