@@ -9,12 +9,9 @@
         <option value="$PROJECT_DIR$/UserMicroservice/pom.xml" />
         <option value="$PROJECT_DIR$/OrderMicroservice/pom.xml" />
         <option value="$PROJECT_DIR$/CartMicroservice/pom.xml" />
+        <option value="$PROJECT_DIR$/CourierMicroservice/pom.xml" />
+        <option value="$PROJECT_DIR$/core/pom.xml" />
       </list>
-    </option>
-    <option name="ignoredFiles">
-      <set>
-        <option value="$PROJECT_DIR$/OrderMicroservice/pom.xml" />
-      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="22" project-jdk-type="JavaSDK">

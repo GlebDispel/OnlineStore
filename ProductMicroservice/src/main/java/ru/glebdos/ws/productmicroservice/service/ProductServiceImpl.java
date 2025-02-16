@@ -3,7 +3,6 @@ package ru.glebdos.ws.productmicroservice.service;
 
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

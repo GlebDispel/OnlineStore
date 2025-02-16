@@ -14,7 +14,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.backoff.FixedBackOff;
-import ru.glebdos.ws.core.CartUpdateMessage;
+
 import ru.glebdos.ws.core.OrderMessage;
 
 import java.util.HashMap;

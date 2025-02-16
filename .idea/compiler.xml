@@ -8,30 +8,29 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36" />
         </processorPath>
       </profile>
-      <profile name="Annotation profile for UserMicroservice" enabled="true">
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+      </profile>
+      <profile name="Annotation profile for CourierMicroservice" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
-        <module name="CartMicroservice" />
-        <module name="ProductMicroservice" />
-        <module name="UserMicroservice" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="core" target="17" />
-      <module name="CourierMicroservice" target="21" />
-      <module name="OrderMicroservice" target="21" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="CartMicroservice" options="-parameters" />
+      <module name="CourierMicroservice" options="-parameters" />
       <module name="OrderMicroservice" options="-parameters" />
       <module name="ProductMicroservice" options="-parameters" />
       <module name="UserMicroservice" options="-parameters" />
+      <module name="core" options="-parameters" />
     </option>
   </component>
 </project>
