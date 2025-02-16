@@ -1,8 +1,0 @@
-ru\glebdos\ws\cartmicroservice\model\Cart.class
-ru\glebdos\ws\cartmicroservice\repository\CartRepository.class
-ru\glebdos\ws\cartmicroservice\dto\UserMessage.class
-ru\glebdos\ws\cartmicroservice\config\KafkaConfig.class
-ru\glebdos\ws\cartmicroservice\service\CartService.class
-ru\glebdos\ws\cartmicroservice\dto\ProductMessage.class
-ru\glebdos\ws\cartmicroservice\CartMicroserviceApplication.class
-ru\glebdos\ws\cartmicroservice\controller\CartController.class

@@ -1,8 +1,0 @@
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\CartMicroserviceApplication.java
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\config\KafkaConfig.java
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\controller\CartController.java
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\dto\ProductMessage.java
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\dto\UserMessage.java
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\model\Cart.java
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\repository\CartRepository.java
-C:\Users\79680\Desktop\PetProject\CartMicroservice\src\main\java\ru\glebdos\ws\cartmicroservice\service\CartService.java
