@@ -1,13 +1,12 @@
 package ru.glebdos.usermicroservice.controller;
 
 
-import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.glebdos.usermicroservice.dto.DynamicDto;
@@ -19,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 
 
 @Slf4j
-@Tag(name = "main_methods")
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -34,14 +32,10 @@ public class UserController {
 
 
 
-    @PostMapping(value = "/registration",produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
+    @PostMapping(value = "/registration")
     public ResponseEntity<String> createUser(@RequestBody @Valid UserDto userDto) throws ExecutionException, InterruptedException {
-        LocalDateTime now = LocalDateTime.now();
         LOGGER.info("Creating user: {}", userDto);
-        log.info("Now: {}", now);
-        LOGGER.warn("test " + now);
         userService.createUser(userDto);
-        LOGGER.info("test info " + now);
         return ResponseEntity.ok("Пользователь создан");
     }
 
@@ -53,7 +47,7 @@ public class UserController {
     }
 
 
-    @PostMapping(value = "/update", produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
+    @PostMapping(value = "/update")
     public ResponseEntity<String> updateUser(@RequestBody @Valid DynamicDto updateUserDto,
                                                    @RequestParam String phoneNumber) {
         LOGGER.info("Number here : {}",phoneNumber);
@@ -66,7 +60,7 @@ public class UserController {
     }
 
 
-    @DeleteMapping(value = "/delete",produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
+    @DeleteMapping(value = "/delete")
     public ResponseEntity<String> deleteUser(@RequestParam String phoneNumber) {
         userService.deleteUser(phoneNumber);
         return ResponseEntity.ok("Пользователь удален");

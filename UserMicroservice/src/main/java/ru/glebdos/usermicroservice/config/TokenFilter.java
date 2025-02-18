@@ -1,5 +1,6 @@
 package ru.glebdos.usermicroservice.config;
 
+
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,8 +21,6 @@ import java.io.IOException;
 @Component
 public class TokenFilter extends OncePerRequestFilter {
 
-
-
     private final JwtCore jwtCore;
 
     private final UserDetailsService userDetailsService;
@@ -30,7 +29,6 @@ public class TokenFilter extends OncePerRequestFilter {
         this.jwtCore = jwtCore;
         this.userDetailsService = userDetailsService;
     }
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

@@ -18,6 +18,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import ru.glebdos.usermicroservice.util.ClientErrorResponse;
+import ru.glebdos.usermicroservice.util.CustomAuthenticationEntryPoint;
 
 
 @Slf4j
@@ -65,15 +67,16 @@ public class SecurityConfig {
                                 new CorsConfiguration().applyPermitDefaultValues())
                 )
                 .exceptionHandling(exception -> exception.
-                        authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 ).authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**","/users/registration").permitAll()
+                        .requestMatchers("/auth/**","/users/registration","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/users/delete**","/users/search**","users/update**").authenticated()
                         .anyRequest().permitAll()
                 )
+
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

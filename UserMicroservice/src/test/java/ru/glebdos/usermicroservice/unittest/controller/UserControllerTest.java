@@ -61,7 +61,9 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/users/registration")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
+                        .content(jsonContent)
+                        .accept(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
+
                 .andExpect(status().isOk())
                 .andExpect(content().string("Пользователь создан"));
 
@@ -251,7 +253,8 @@ public class UserControllerTest {
         mockMvc.perform(post("/users/update")
                         .param("phoneNumber", phoneNumber)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
+                        .content(jsonContent)
+                        .accept(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Пользователь обновлен"));
     }
@@ -269,7 +272,8 @@ public class UserControllerTest {
         mockMvc.perform(post("/users/update")
                         .param("phoneNumber", phoneNumber)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
+                        .content(jsonContent)
+                        .accept(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Пользователь обновлен"));
     }
@@ -389,7 +393,8 @@ public class UserControllerTest {
 
         mockMvc.perform(delete("/users/delete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("phoneNumber", phoneNumber))
+                        .param("phoneNumber", phoneNumber)
+                        .accept(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Пользователь удален"));
 

@@ -1,12 +1,17 @@
 package ru.glebdos.usermicroservice.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -14,12 +19,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 
+import java.io.IOException;
 import java.util.List;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ClientErrorResponse> handleGenericException(Exception e) {
@@ -48,7 +55,10 @@ public class GlobalExceptionHandler {
                 System.currentTimeMillis()
         );
         LOGGER.error(response.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
     //Ловит ошибки, возникающие при неверном формате тела запроса, например, синтаксические ошибки JSON.
@@ -60,7 +70,10 @@ public class GlobalExceptionHandler {
                 System.currentTimeMillis()
         );
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
     // Ловит ошибки, связанные с отсутствием объекта в базе данных
@@ -68,12 +81,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ClientErrorResponse> handleEntityNotFoundException(EntityNotFoundException e) {
         LOGGER.error("Entity number: {}", e.getMessage());
 
-        ClientErrorResponse patternResponse = new ClientErrorResponse(
+        ClientErrorResponse response = new ClientErrorResponse(
 
                 "Пользователь c номером " + e.getMessage() + " не найден",
                 System.currentTimeMillis()
         );
-        return new ResponseEntity<>(patternResponse, HttpStatus.NOT_FOUND);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
 
     }
 
@@ -85,7 +101,10 @@ public class GlobalExceptionHandler {
                 System.currentTimeMillis()
         );
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -96,12 +115,15 @@ public class GlobalExceptionHandler {
                 System.currentTimeMillis()
         );
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ClientErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-        LOGGER.error("DataIntegrityViolationException: {}", e.getMessage());
+        LOGGER.error("DataIntegrityViolationException: {}", e.getMessage(), e);
 
         ClientErrorResponse response = new ClientErrorResponse(
                 e.getMessage(),
@@ -117,8 +139,14 @@ public class GlobalExceptionHandler {
                  "Пользователь с таким электронным адресом уже существует",System.currentTimeMillis());
        }
 
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
+
+
+
 
 
 }

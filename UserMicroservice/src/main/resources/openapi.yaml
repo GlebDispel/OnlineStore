@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  description: API для управления пользователем
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Main server
+tags:
+  - name: User
+    description: Методы для работы с пользователем
+paths:
+  /users/registration:
+    post:
+      tags:
+        - User
+      summary: Создание нового пользователя
+      description: Создает нового пользователя и возвращает сообщение о создании или ошибку.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+      responses:
+        '200':
+          description: Успешное создание пользователя
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Пользователь создан"
+        '400':
+          description: Неверный запрос (например, невалидный email или телефон)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Internal server error"
+                timestamp: 1739711288975
+        '409':
+          description: Конфликт парраметров в базе данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Пользователь с таким email уже зарегестриован"
+                timestamp: 1739711288975
+  /users/search:
+    get:
+      tags:
+        - User
+      summary: Поиск пользователя
+      description: Ищет пользователя по номеру телефона
+      operationId: searchUser
+      parameters:
+        - name: phoneNumber
+          in: query
+          required: true
+          description: Номер телефона для поиска пользователя
+          schema:
+            type: string
+            example: "+79219008833"
+      responses:
+        200:
+          description: успешный поиск пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        400:
+          description: Неправильный формат номера телефона
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Неправильный формат телефонного номера. Ожидаемый формат: +79219008833"
+                timestamp: 1739711288975
+        401:
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Неавторизованный пользователь, доступ запрещен"
+                timestamp: 1739711288975
+
+
+
+components:
+  schemas:
+    UserDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Федор
+        secondName:
+          type: string
+          example: Сумкин
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        phoneNumber:
+          pattern: '^\+7[0-9]{10}$'
+          example: "+79219008833"
+        address:
+          type: string
+          example: Шир д. 205
+        password:
+          type: string
+          example: qwerty
+    DynamicDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Федор
+        SecondName:
+          type: string
+          example: Сумкин
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        phoneNumber:
+          pattern: '^\+7[0-9]{10}$'
+          example: "+79219008833"
+        address:
+          type: string
+          example: Шир д. 205
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Сообщение об ошибке
+          example: "email - должно иметь формат адреса электронной почты"
+        timestamp:
+          type: integer
+          format: int64
+          description: Временная метка (timestamp) возникновения ошибки
+          example: 1739711288975
